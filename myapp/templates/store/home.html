@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Mk-Ecommerce – Home{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="bg-dark text-white py-5">
+  <div class="container py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold">Shop Smart,<br>Live Better.</h1>
+        <p class="lead text-secondary mb-4">Discover thousands of products with the best deals every day.</p>
+        <a href="{% url 'product_list' %}" class="btn btn-danger btn-lg me-2">Shop Now</a>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-light btn-lg">Browse All</a>
+      </div>
+      <div class="col-lg-6 text-center mt-4 mt-lg-0">
+        <i class="bi bi-bag-heart-fill text-danger" style="font-size:10rem;opacity:.8;"></i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+{% if categories %}
+<section class="py-5">
+  <div class="container">
+    <h2 class="fw-bold mb-4">Shop by Category</h2>
+    <div class="row g-3">
+      {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="text-decoration-none">
+          <div class="card text-center border-0 shadow-sm h-100 p-3">
+            {% if cat.image %}
+              <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="rounded-circle mx-auto mb-2" style="width:64px;height:64px;object-fit:cover;">
+            {% else %}
+              <div class="rounded-circle bg-danger bg-opacity-10 mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+                <i class="bi bi-grid fs-4 text-danger"></i>
+              </div>
+            {% endif %}
+            <small class="fw-semibold text-dark">{{ cat.name }}</small>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="py-4 bg-white">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Featured Products</h2>
+      <a href="{% url 'product_list' %}" class="btn btn-outline-danger btn-sm">View All</a>
+    </div>
+    <div class="row g-4">
+      {% for product in featured_products %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card h-100 shadow-sm position-relative">
+          {% if product.discount_percent %}
+            <span class="badge bg-danger badge-discount">-{{ product.discount_percent }}%</span>
+          {% endif %}
+          {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+          {% else %}
+            <div class="d-flex align-items-center justify-content-center bg-light" style="height:220px;">
+              <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+            </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <small class="text-muted">{{ product.category.name }}</small>
+            <h6 class="card-title mt-1">{{ product.name }}</h6>
+            <div class="mt-auto">
+              <span class="fw-bold text-danger fs-5">₹{{ product.final_price }}</span>
+              {% if product.discount_price %}
+                <small class="text-muted text-decoration-line-through ms-1">₹{{ product.price }}</small>
+              {% endif %}
+              <div class="d-grid mt-2">
+                <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-dark">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">New Arrivals</h2>
+      <a href="{% url 'product_list' %}?sort=newest" class="btn btn-outline-danger btn-sm">View All</a>
+    </div>
+    <div class="row g-4">
+      {% for product in new_arrivals %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card h-100 shadow-sm position-relative">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+          {% else %}
+            <div class="d-flex align-items-center justify-content-center bg-light" style="height:220px;">
+              <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+            </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <small class="text-muted">{{ product.category.name }}</small>
+            <h6 class="card-title mt-1">{{ product.name }}</h6>
+            <div class="mt-auto">
+              <span class="fw-bold text-danger">₹{{ product.final_price }}</span>
+              <div class="d-grid mt-2">
+                <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-dark">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

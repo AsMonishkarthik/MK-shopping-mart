@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Cart – Mk-Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-cart3 text-danger"></i> Your Cart</h2>
+
+  {% if cart.items.all %}
+  <div class="row g-4">
+    <!-- Cart items -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart.items.all %}
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-3">
+                    {% if item.product.image %}
+                      <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded" style="width:60px;height:60px;object-fit:cover;">
+                    {% else %}
+                      <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:60px;height:60px;">
+                        <i class="bi bi-image text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div>
+                      <a href="{% url 'product_detail' item.product.slug %}" class="text-dark fw-semibold text-decoration-none">
+                        {{ item.product.name }}
+                      </a>
+                      <div><small class="text-muted">{{ item.product.category.name }}</small></div>
+                    </div>
+                  </div>
+                </td>
+                <td>₹{{ item.product.final_price }}</td>
+                <td style="width:130px;">
+                  <form method="POST" action="{% url 'update_cart' item.id %}" class="d-flex align-items-center gap-1">
+                    {% csrf_token %}
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" class="btn btn-sm btn-outline-secondary">−</button>
+                    <span class="px-2">{{ item.quantity }}</span>
+                    <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" class="btn btn-sm btn-outline-secondary">+</button>
+                  </form>
+                </td>
+                <td>₹{{ item.get_total_price }}</td>
+                <td>
+                  <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-sm btn-outline-danger" title="Remove">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between mt-3">
+        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Continue Shopping
+        </a>
+        <a href="{% url 'clear_cart' %}" class="btn btn-outline-danger" onclick="return confirm('Clear all items?')">
+          <i class="bi bi-trash"></i> Clear Cart
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Order Summary</h5>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Subtotal</span>
+          <span>₹{{ cart.total_price }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Shipping</span>
+          <span class="{% if cart.total_price >= 500 %}text-success{% endif %}">
+            {% if cart.total_price >= 500 %}Free{% else %}₹50{% endif %}
+          </span>
+        </div>
+        {% if cart.total_price < 500 %}
+        <small class="text-muted">Add ₹{{ 500|floatformat:0 }} more for free shipping</small>
+        {% endif %}
+        <hr>
+        <div class="d-flex justify-content-between fw-bold fs-5">
+          <span>Total</span>
+          <span class="text-danger">₹{% if cart.total_price >= 500 %}{{ cart.total_price }}{% else %}{{ cart.total_price|floatformat:2 }}{% endif %}</span>
+        </div>
+        <div class="d-grid mt-4">
+          <a href="{% url 'checkout' %}" class="btn btn-danger btn-lg">Proceed to Checkout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-cart-x text-muted" style="font-size:5rem;"></i>
+    <h4 class="mt-3 fw-bold">Your cart is empty</h4>
+    <p class="text-muted">Looks like you haven't added anything yet.</p>
+    <a href="{% url 'product_list' %}" class="btn btn-danger">Shop Now</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

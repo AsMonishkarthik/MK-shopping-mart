@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Register – Mk-Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-person-plus-fill fs-1 text-danger"></i>
+          <h3 class="fw-bold mt-2">Create Account</h3>
+          <p class="text-muted">Join Mk-Ecommerce today</p>
+        </div>
+        <form method="POST">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger small mt-1">{{ field.errors.as_text }}</div>
+            {% endif %}
+            {% if field.help_text %}
+              <div class="text-muted small mt-1">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-danger btn-lg">Create Account</button>
+          </div>
+        </form>
+        <p class="text-center text-muted mt-3 mb-0">
+          Already have an account? <a href="{% url 'login' %}" class="text-danger">Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  input[type=text], input[type=password] { width: 100%; }
+  .form-control { border-radius: 8px; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Apply Bootstrap classes to Django form fields
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (!el.classList.contains('btn')) {
+      el.classList.add('form-control');
+    }
+  });
+</script>
+{% endblock %}

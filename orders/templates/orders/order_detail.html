@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} – Mk-Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'order_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">Order #{{ order.id }}</h2>
+    <span class="badge fs-6
+      {% if order.status == 'delivered' %}bg-success
+      {% elif order.status == 'cancelled' %}bg-danger
+      {% elif order.status == 'shipped' %}bg-info
+      {% elif order.status == 'processing' %}bg-primary
+      {% else %}bg-warning text-dark{% endif %}">
+      {{ order.get_status_display }}
+    </span>
+  </div>
+
+  <div class="row g-4">
+    <!-- Items -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Items</h5>
+        {% for item in order.items.all %}
+        <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+          <div>
+            <h6 class="mb-0">{{ item.product_name }}</h6>
+            <small class="text-muted">₹{{ item.price }} × {{ item.quantity }}</small>
+          </div>
+          <strong>₹{{ item.get_total_price }}</strong>
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-between mt-3">
+          <span class="text-muted">Subtotal</span>
+          <span>₹{{ order.subtotal }}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-1">
+          <span class="text-muted">Shipping</span>
+          <span>{% if order.shipping_fee == 0 %}<span class="text-success">Free</span>{% else %}₹{{ order.shipping_fee
+            }}{% endif %}</span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
+          <span>Total</span>
+          <span class="text-danger">₹{{ order.total }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <h6 class="fw-bold mb-3">Shipping Address</h6>
+        <!-- Cancel Order -->
+        {% if order.status == 'pending' or order.status == 'confirmed' %}
+        <div class="card border-0 shadow-sm p-4 mt-3 border-danger" style="border: 1px solid #dc3545 !important;">
+          <h6 class="fw-bold mb-2 text-danger"><i class="bi bi-x-circle"></i> Cancel Order</h6>
+          <p class="text-muted small mb-3">You can cancel this order because it hasn't shipped yet. Your stock will be
+            restored.</p>
+          <button class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">
+            Cancel This Order
+          </button>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="cancelModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Cancel Order #{{ order.id }}?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body text-muted">
+                Are you sure you want to cancel this order? This action <strong>cannot be undone</strong>.
+                Your stock will be automatically restored.
+              </div>
+              <div class="modal-footer border-0">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">No, Keep Order</button>
+                <form method="POST" action="{% url 'cancel_order' order.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Yes, Cancel Order</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <p class="mb-0 text-muted">
+          <strong class="text-dark">{{ order.full_name }}</strong><br>
+          {{ order.address }}<br>
+          {{ order.city }}, {{ order.state }} – {{ order.pincode }}<br>
+          <i class="bi bi-telephone"></i> {{ order.phone }}<br>
+          <i class="bi bi-envelope"></i> {{ order.email }}
+        </p>
+      </div>
+      <div class="card border-0 shadow-sm p-4">
+        <h6 class="fw-bold mb-3">Order Info</h6>
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Placed on</span>
+          <span>{{ order.created_at|date:"d M Y, H:i" }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Payment</span>
+          <span>{{ order.get_payment_method_display }}</span>
+        </div>
+        {% if order.notes %}
+        <div class="mt-2">
+          <small class="text-muted">Notes:</small>
+          <p class="small mb-0">{{ order.notes }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

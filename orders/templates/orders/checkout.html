@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Checkout – Mk-Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-credit-card text-danger"></i> Checkout</h2>
+  <div class="row g-4">
+    <!-- Shipping form -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Shipping Information</h5>
+        <form method="POST" id="checkout-form">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Full Name</label>
+              <input type="text" name="full_name" class="form-control" value="{{ user.get_full_name }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Phone</label>
+              <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Address</label>
+              <textarea name="address" class="form-control" rows="2" placeholder="House/Flat/Block No., Street" required></textarea>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">City</label>
+              <input type="text" name="city" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">State</label>
+              <input type="text" name="state" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Pincode</label>
+              <input type="text" name="pincode" class="form-control" maxlength="6" required>
+            </div>
+          </div>
+
+          <hr class="my-4">
+          <h5 class="fw-bold mb-3">Payment Method</h5>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" value="cod" id="cod" checked>
+              <label class="form-check-label" for="cod"><i class="bi bi-cash-coin text-success"></i> Cash on Delivery</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" value="online" id="online">
+              <label class="form-check-label" for="online"><i class="bi bi-phone text-primary"></i> Online Payment</label>
+            </div>
+          </div>
+
+          <div class="mb-3 mt-3">
+            <label class="form-label fw-semibold">Order Notes <span class="text-muted fw-normal">(optional)</span></label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Any special instructions..."></textarea>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order summary -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Order Summary</h5>
+        {% for item in cart.items.all %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <span class="fw-semibold">{{ item.product.name }}</span>
+            <small class="text-muted ms-1">×{{ item.quantity }}</small>
+          </div>
+          <span>₹{{ item.get_total_price }}</span>
+        </div>
+        {% endfor %}
+        <hr>
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Subtotal</span>
+          <span>₹{{ cart.total_price }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Shipping</span>
+          <span class="{% if shipping_fee == 0 %}text-success{% endif %}">
+            {% if shipping_fee == 0 %}Free{% else %}₹{{ shipping_fee }}{% endif %}
+          </span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
+          <span>Total</span>
+          <span class="text-danger">₹{{ total }}</span>
+        </div>
+        <div class="d-grid mt-4">
+          <button type="submit" form="checkout-form" class="btn btn-danger btn-lg">
+            <i class="bi bi-bag-check"></i> Place Order
+          </button>
+        </div>
+        <small class="text-muted text-center d-block mt-2">
+          <i class="bi bi-shield-check text-success"></i> Secure checkout
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

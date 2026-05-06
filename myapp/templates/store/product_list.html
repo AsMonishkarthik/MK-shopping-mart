@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Products – Mk-Ecommerce{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Sidebar filters -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm p-3">
+        <h5 class="fw-bold mb-3"><i class="bi bi-funnel"></i> Filters</h5>
+
+        <!-- Categories -->
+        <h6 class="text-muted small text-uppercase fw-semibold">Category</h6>
+        <ul class="list-unstyled mb-3">
+          <li>
+            <a href="{% url 'product_list' %}{% if query %}?q={{ query }}{% endif %}"
+               class="text-decoration-none {% if not selected_category %}fw-bold text-danger{% else %}text-dark{% endif %}">
+              All
+            </a>
+          </li>
+          {% for cat in categories %}
+          <li>
+            <a href="{% url 'product_list' %}?category={{ cat.slug }}{% if query %}&q={{ query }}{% endif %}"
+               class="text-decoration-none {% if selected_category.slug == cat.slug %}fw-bold text-danger{% else %}text-dark{% endif %}">
+              {{ cat.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <!-- Price Range -->
+        <h6 class="text-muted small text-uppercase fw-semibold">Price Range</h6>
+        <form method="GET" action="{% url 'product_list' %}">
+          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+          <input type="hidden" name="sort" value="{{ sort }}">
+          <div class="row g-2 mb-2">
+            <div class="col"><input class="form-control form-control-sm" type="number" name="min_price" placeholder="Min ₹" value="{{ request.GET.min_price }}"></div>
+            <div class="col"><input class="form-control form-control-sm" type="number" name="max_price" placeholder="Max ₹" value="{{ request.GET.max_price }}"></div>
+          </div>
+          <button class="btn btn-sm btn-danger w-100">Apply</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="col-lg-9">
+      <!-- Header bar -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="fw-bold mb-0">
+            {% if selected_category %}{{ selected_category.name }}{% elif query %}Results for "{{ query }}"{% else %}All Products{% endif %}
+          </h4>
+          <small class="text-muted">{{ products|length }} product{{ products|length|pluralize }}</small>
+        </div>
+        <form method="GET" action="{% url 'product_list' %}">
+          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+          <select class="form-select form-select-sm" name="sort" onchange="this.form.submit()">
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name A–Z</option>
+          </select>
+        </form>
+      </div>
+
+      {% if products %}
+      <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-md-4">
+          <div class="card product-card h-100 shadow-sm position-relative">
+            {% if product.discount_percent %}
+              <span class="badge bg-danger badge-discount">-{{ product.discount_percent }}%</span>
+            {% endif %}
+            {% if product.image %}
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center bg-light" style="height:220px;">
+                <i class="bi bi-image text-secondary" style="font-size:3rem;"></i>
+              </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <small class="text-muted">{{ product.category.name }}</small>
+              <h6 class="card-title mt-1">{{ product.name }}</h6>
+              <p class="card-text text-muted small">{{ product.description|truncatewords:12 }}</p>
+              <div class="mt-auto">
+                <span class="fw-bold text-danger">₹{{ product.final_price }}</span>
+                {% if product.discount_price %}
+                  <small class="text-muted text-decoration-line-through ms-1">₹{{ product.price }}</small>
+                {% endif %}
+                {% if product.stock == 0 %}
+                  <div class="d-grid mt-2"><button class="btn btn-sm btn-secondary" disabled>Out of Stock</button></div>
+                {% else %}
+                  <div class="d-flex gap-2 mt-2">
+                    <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-dark flex-grow-1">Details</a>
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-sm btn-danger"><i class="bi bi-cart-plus"></i></a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-search text-muted" style="font-size:4rem;"></i>
+        <p class="text-muted mt-3">No products found. Try adjusting your filters.</p>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-danger">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
